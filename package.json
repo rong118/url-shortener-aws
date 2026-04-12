@@ -1,5 +1,5 @@
 {
-  "name": "short-url-aws",
+  "name": "url-shortener-aws",
   "version": "0.0.1",
   "description": "URL shortening service",
   "main": "src/server.js",
