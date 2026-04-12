@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>URL Shortener</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #f5f5f5;
+      color: #222;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    h1 { font-size: 1.75rem; margin-bottom: 0.25rem; }
+    .subtitle { color: #666; font-size: 0.9rem; margin-bottom: 2rem; }
+
+    .container { max-width: 680px; margin: 0 auto; }
+
+    .card {
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .card h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .badge-post { background: #2563eb; }
+    .badge-get  { background: #16a34a; }
+
+    .field { margin-bottom: 0.75rem; }
+    .field label { display: block; font-size: 0.85rem; color: #555; margin-bottom: 0.3rem; }
+    .field input {
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .field input:focus { border-color: #2563eb; }
+
+    button {
+      padding: 0.5rem 1.25rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: background 0.15s;
+    }
+    .btn-primary { background: #2563eb; color: #fff; }
+    .btn-primary:hover { background: #1d4ed8; }
+    .btn-secondary { background: #16a34a; color: #fff; }
+    .btn-secondary:hover { background: #15803d; }
+
+    .result {
+      margin-top: 1rem;
+      padding: 0.75rem;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      display: none;
+    }
+    .result.success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
+    .result.error   { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+
+    .result pre {
+      margin-top: 0.5rem;
+      white-space: pre-wrap;
+      word-break: break-all;
+      font-family: monospace;
+      font-size: 0.82rem;
+    }
+
+    .short-link { font-weight: 600; }
+    .short-link a { color: #2563eb; }
+
+    .api-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+    .api-table th, .api-table td {
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .api-table th { color: #888; font-weight: 600; font-size: 0.78rem; text-transform: uppercase; }
+    .api-table tr:last-child td { border-bottom: none; }
+    .api-table code {
+      background: #f4f4f4;
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 0.82rem;
+    }
+    .api-table a { color: #2563eb; text-decoration: none; }
+    .api-table a:hover { text-decoration: underline; }
+
+    .health-dot {
+      display: inline-block;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #ccc;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+    .health-dot.up   { background: #16a34a; }
+    .health-dot.down { background: #dc2626; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>URL Shortener</h1>
+  <p class="subtitle">Testing &amp; validation UI &mdash; running on <strong id="baseUrl"></strong></p>
+
+  <!-- Shorten -->
+  <div class="card">
+    <h2><span class="badge badge-post">POST</span> /api/shorten</h2>
+    <div class="field">
+      <label for="longUrl">Long URL</label>
+      <input id="longUrl" type="url" placeholder="https://example.com/very/long/path" />
+    </div>
+    <button class="btn-primary" onclick="shorten()">Shorten</button>
+    <div id="shortenResult" class="result"></div>
+  </div>
+
+  <!-- Stats -->
+  <div class="card">
+    <h2><span class="badge badge-get">GET</span> /api/stats/:code</h2>
+    <div class="field">
+      <label for="statsCode">Short code</label>
+      <input id="statsCode" type="text" placeholder="e.g. aB3xY7z" />
+    </div>
+    <button class="btn-secondary" onclick="getStats()">Fetch stats</button>
+    <div id="statsResult" class="result"></div>
+  </div>
+
+  <!-- Redirect -->
+  <div class="card">
+    <h2><span class="badge badge-get">GET</span> /:code &mdash; redirect</h2>
+    <div class="field">
+      <label for="redirectCode">Short code</label>
+      <input id="redirectCode" type="text" placeholder="e.g. aB3xY7z" />
+    </div>
+    <button class="btn-secondary" onclick="openRedirect()">Open redirect</button>
+    <p style="font-size:0.8rem;color:#888;margin-top:0.5rem;">
+      Opens the short URL in a new tab — the server will 302 you to the original URL.
+    </p>
+  </div>
+
+  <!-- API reference -->
+  <div class="card">
+    <h2>API reference</h2>
+    <table class="api-table">
+      <thead>
+        <tr><th>Method</th><th>Path</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="badge badge-post">POST</span></td>
+          <td><code>/api/shorten</code></td>
+          <td>Body: <code>{"originalUrl":"…"}</code> — returns short code &amp; full short URL</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-get">GET</span></td>
+          <td><code>/api/stats/:code</code></td>
+          <td>Click stats for a short code</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-get">GET</span></td>
+          <td><code>/:code</code></td>
+          <td>302 redirect to original URL</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-get">GET</span></td>
+          <td><a href="/health" target="_blank"><code>/health</code></a></td>
+          <td>
+            <span class="health-dot" id="healthDot"></span>
+            <span id="healthStatus">checking…</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  const base = window.location.origin;
+  document.getElementById('baseUrl').textContent = base;
+
+  // Health check on load
+  fetch('/health')
+    .then(r => r.json())
+    .then(d => {
+      document.getElementById('healthDot').className = 'health-dot up';
+      document.getElementById('healthStatus').textContent = 'up — ' + JSON.stringify(d);
+    })
+    .catch(() => {
+      document.getElementById('healthDot').className = 'health-dot down';
+      document.getElementById('healthStatus').textContent = 'unreachable';
+    });
+
+  function showResult(id, ok, content) {
+    const el = document.getElementById(id);
+    el.className = 'result ' + (ok ? 'success' : 'error');
+    el.style.display = 'block';
+    el.innerHTML = content;
+  }
+
+  async function shorten() {
+    const url = document.getElementById('longUrl').value.trim();
+    if (!url) { showResult('shortenResult', false, 'Please enter a URL.'); return; }
+    try {
+      const res = await fetch('/api/shorten', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: url }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw data;
+      const shortUrl = data.shortUrl || (base + '/' + data.shortCode);
+      document.getElementById('statsCode').value = data.shortCode || '';
+      document.getElementById('redirectCode').value = data.shortCode || '';
+      showResult('shortenResult', true,
+        `<span class="short-link">Short URL: </span>` +
+        `<pre>${JSON.stringify(data, null, 2)}</pre>`);
+    } catch (err) {
+      showResult('shortenResult', false, '<pre>' + JSON.stringify(err, null, 2) + '</pre>');
+    }
+  }
+
+  async function getStats() {
+    const code = document.getElementById('statsCode').value.trim();
+    if (!code) { showResult('statsResult', false, 'Please enter a short code.'); return; }
+    try {
+      const res = await fetch(`/api/stats/${encodeURIComponent(code)}`);
+      const data = await res.json();
+      if (!res.ok) throw data;
+      showResult('statsResult', true, '<pre>' + JSON.stringify(data, null, 2) + '</pre>');
+    } catch (err) {
+      showResult('statsResult', false, '<pre>' + JSON.stringify(err, null, 2) + '</pre>');
+    }
+  }
+
+  function openRedirect() {
+    const code = document.getElementById('redirectCode').value.trim();
+    if (!code) { alert('Please enter a short code.'); return; }
+    window.open('/' + encodeURIComponent(code), '_blank');
+  }
+</script>
+</body>
+</html>
