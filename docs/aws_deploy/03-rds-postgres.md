@@ -14,7 +14,7 @@ SUBNET_IDS=$(aws ec2 describe-subnets \
 aws rds create-db-subnet-group \
   --db-subnet-group-name url-shortener-subnet-group \
   --db-subnet-group-description "URL shortener DB subnet group" \
-  --subnet-ids $SUBNET_IDS
+  --subnet-ids ${=SUBNET_IDS}
 ```
 
 ## 3.2 Create the RDS instance
@@ -32,7 +32,7 @@ aws rds create-db-instance \
   --no-publicly-accessible \
   --vpc-security-group-ids $RDS_SG \
   --db-subnet-group-name url-shortener-subnet-group \
-  --backup-retention-period 7 \
+  --backup-retention-period 0 \
   --no-multi-az \
   --storage-type gp2
 ```

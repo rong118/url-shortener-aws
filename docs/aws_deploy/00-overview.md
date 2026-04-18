@@ -34,6 +34,6 @@ EC2 (Node.js :3000)
 ## Cost note
 
 All services can be started on free-tier eligible sizes:
-- EC2: `t2.micro`
+- EC2: `t3.micro`
 - RDS: `db.t3.micro`, single-AZ
 - ElastiCache: `cache.t3.micro`, single node

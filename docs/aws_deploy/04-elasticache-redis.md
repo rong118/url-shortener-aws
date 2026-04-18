@@ -6,7 +6,7 @@
 aws elasticache create-cache-subnet-group \
   --cache-subnet-group-name url-shortener-cache-subnet \
   --cache-subnet-group-description "URL shortener cache subnet group" \
-  --subnet-ids $SUBNET_IDS
+  --subnet-ids ${=SUBNET_IDS}
 ```
 
 ## 4.2 Create the Redis cluster
