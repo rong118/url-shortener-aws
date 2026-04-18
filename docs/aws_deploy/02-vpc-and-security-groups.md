@@ -28,6 +28,11 @@ aws ec2 authorize-security-group-ingress \
   --group-id $EC2_SG \
   --protocol tcp --port 22 --cidr ${MY_IP}/32
 
+# Optional that if you access from different location
+aws ec2 authorize-security-group-ingress \
+  --group-id $EC2_SG \
+  --protocol tcp --port 22 --cidr 0.0.0.0/0
+
 # Allow HTTP traffic on port 3000 from anywhere (or front with ALB later)
 aws ec2 authorize-security-group-ingress \
   --group-id $EC2_SG \

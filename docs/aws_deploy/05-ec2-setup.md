@@ -13,7 +13,7 @@ AMI_ID=$(aws ec2 describe-images \
 
 INSTANCE_ID=$(aws ec2 run-instances \
   --image-id $AMI_ID \
-  --instance-type t2.micro \
+  --instance-type t3.micro \
   --key-name url-shortener-key \
   --security-group-ids $EC2_SG \
   --associate-public-ip-address \
