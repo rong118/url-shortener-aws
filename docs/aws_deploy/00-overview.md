@@ -19,6 +19,7 @@ This guide walks through deploying the URL shortener on AWS using:
 | 6 | [06-env-and-migrate.md](06-env-and-migrate.md) | Configure `.env` and run DB migration |
 | 7 | [07-process-manager.md](07-process-manager.md) | Run the app with PM2 (auto-restart on reboot) |
 | 8 | [08-verify.md](08-verify.md) | Smoke-test the deployment |
+| 9 | [09-custom-domain.md](09-custom-domain.md) | Custom domain via Route 53 + Elastic IP |
 
 ## Architecture diagram
 
@@ -26,7 +27,10 @@ This guide walks through deploying the URL shortener on AWS using:
 Internet
    │
    ▼
-EC2 (Node.js :3000)
+Route 53 (yourdomain.com → Elastic IP)
+   │
+   ▼
+EC2 nginx :80 → Node.js :3000
    ├── RDS PostgreSQL  (private subnet, port 5432)
    └── ElastiCache Redis (private subnet, port 6379)
 ```
