@@ -20,6 +20,7 @@ This guide walks through deploying the URL shortener on AWS using:
 | 7 | [07-process-manager.md](07-process-manager.md) | Run the app with PM2 (auto-restart on reboot) |
 | 8 | [08-verify.md](08-verify.md) | Smoke-test the deployment |
 | 9 | [09-custom-domain.md](09-custom-domain.md) | Custom domain via Route 53 + Elastic IP |
+| 10 | [10-teardown.md](10-teardown.md) | Delete all AWS resources |
 
 ## Architecture diagram
 
