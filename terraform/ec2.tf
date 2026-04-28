@@ -1,0 +1,46 @@
+# ── SSH key pair ──────────────────────────────────────────────────────────────
+resource "aws_key_pair" "deployer" {
+  key_name   = "url-shortener-key"
+  public_key = file(var.ssh_public_key_path)
+}
+
+# ── Latest Amazon Linux 2023 AMI ──────────────────────────────────────────────
+data "aws_ami" "al2023" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["al2023-ami-2023*-x86_64"]
+  }
+
+  filter {
+    name   = "state"
+    values = ["available"]
+  }
+}
+
+# ── EC2 instance ──────────────────────────────────────────────────────────────
+resource "aws_instance" "app" {
+  ami                         = data.aws_ami.al2023.id
+  instance_type               = "t3.micro"
+  key_name                    = aws_key_pair.deployer.key_name
+  vpc_security_group_ids      = [aws_security_group.ec2.id]
+  associate_public_ip_address = true
+
+  user_data = <<-EOF
+    #!/bin/bash
+    curl -fsSL https://rpm.nodesource.com/setup_22.x | bash -
+    dnf install -y nodejs git
+  EOF
+
+  tags = { Name = "url-shortener-app" }
+}
+
+# ── Elastic IP ────────────────────────────────────────────────────────────────
+resource "aws_eip" "app" {
+  instance = aws_instance.app.id
+  domain   = "vpc"
+
+  tags = { Name = "url-shortener-eip" }
+}
