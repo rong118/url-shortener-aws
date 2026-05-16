@@ -1,4 +1,22 @@
 services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: "3000"
+      BASE_URL: "http://localhost:3000"
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: shorturl
+      DB_USER: shorturl
+      DB_PASSWORD: shorturl
+      REDIS_URL: "redis://redis:6379"
+      URL_TTL_DAYS: "7"
+    depends_on:
+      - postgres
+      - redis
+
   postgres:
     image: postgres:16-alpine
     environment:
