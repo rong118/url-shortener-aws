@@ -13,6 +13,11 @@ output "redis_endpoint" {
   value       = aws_elasticache_cluster.redis.cache_nodes[0].address
 }
 
+output "ecr_repository_url" {
+  description = "ECR repository for the app Docker image"
+  value       = aws_ecr_repository.app.repository_url
+}
+
 output "ssh_command" {
   description = "SSH command to connect to EC2"
   value       = "ssh -i ~/.ssh/url-shortener-key ec2-user@${aws_eip.app.public_ip}"
